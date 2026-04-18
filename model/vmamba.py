@@ -66,13 +66,15 @@ class LSA(nn.Module):
         # mask = (torch.rand(x.shape[0], 1, 1) < 0.8).float().to(x.device)
 
         # 生成随机连续为1的掩码
-        batch_size = x.shape[0]
-        mask_shape = (batch_size, 1, 1)
+        batch_size, C, L = x.shape
+        mask_shape = (batch_size, 1, L)
         mask = torch.zeros(mask_shape, device=x.device)
 
         for i in range(batch_size):
-            length = int(mask_shape[-1] * 0.75)  # 50%的长度
-            start = torch.randint(0, mask_shape[-1] - length + 1, (1,)).item()  # 确保从该位置开始不会超出掩码长度
+            length = int(L * 0.75)  # 50%的长度
+            if length < 1:
+                length = 1
+            start = torch.randint(0, L - length + 1, (1,)).item()
             end = start + length
             mask[i, :, start:end] = 1.0
 
